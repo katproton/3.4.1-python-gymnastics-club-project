@@ -1,0 +1,11 @@
+ID,Name,Age,Gender,Membership Type,Join Date,Monthly Fee (£ pm),Skill Level,Sessions Per Week
+1,Emma Johnson,12,F,Recreational,2023-1-15,25,Beginner,1
+2,Jack Smith,15,M,Development,2022-3-20,35,Intermediate,2
+3,Olivia Brown,10,F,Recreational,2023-5-25,25,Beginner,1
+4,Ethan Davis,17,M,Competitive,2021-2-3,65,Advanced,4
+5,Ava Wilson,13,F,Development,2022-9-9,35,Intermediate,2
+6,Noah Taylor,14,M,Development,2023-6-14,35,Intermediate,2
+7,Mia Anderson,9,F,Recreational,2022-4-29,25,Beginner,1
+8,Lucas Thomas,16,M,Competitive,2023-4-3,65,Advanced,4
+9,Lily Moore,11,F,Recreational,2023-9-16,25,Beginner,1
+10,Hattie Jackson,18,F,Competitive,2023-1-7,65,Advanced,4
