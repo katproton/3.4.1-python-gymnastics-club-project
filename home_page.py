@@ -1,4 +1,6 @@
 import csv
+import re
+from datetime import datetime 
 
 
 # Creating initial dict of 10 records of members
@@ -58,28 +60,100 @@ def view_all_members(members):
 
 # Views a single member
 def single_member(members):
-    name = input("Enter full name: ")
+    name = input("Enter full name: ").strip()
     for member in members:
+        # converting names to lowercase to see if it exists
         if member["Name"].lower() == name.lower():
             print("\n---Member Found---\n")
             print(member)
             break
+    # once converted to lowercase, if there's no match that member doesn't exist    
     if member["Name"].lower() != name.lower():
         print("\n---Member Not Found---\n")
 
 
+# boolean to check if contains numbers or special chars
+def contains_numbers_or_specials(text):
+       return bool(re.search(r'[^a-zA-Z\s]', text))
+
+# validates name entry 
+def enter_name():
+    while True:
+        full_name = input("Enter full name: ").strip().title()
+        if contains_numbers_or_specials(full_name):
+            print("Name cannot contain numbers or special characters. Please try again.")
+        return full_name 
+
+# validating age
+def valid_age():
+    while True:
+        member_age = int(input("Enter age: "))
+        if 3 <= member_age <= 17:
+            return member_age
+        else:
+            print("Invalid entry. Members must be 3-17 years old. Try again")
+
+
+# checks date is correct format
+def valid_date():
+    while True:
+        user_date = input("Enter join date (YYYY-MM-DD): ").strip()
+        try:
+            datetime.strptime(user_date, "%Y-%m-%d")
+            return user_date
+        except ValueError:
+            print("Invalid date format. Please try again using YYYY-MM-DD")
+
+# validating membership type
+def valid_membership(): 
+    valid = ["Recreational", "Development", "Competitive"]
+    while True:
+        user_membership = input("Enter membership type (Recreational/Development/Competitive): ").title().strip() 
+        if user_membership in valid:
+            return user_membership
+        else:
+            print("Invalid membership. Please try again using Recreational/Development/Competitive")
+
+# validating skill level
+def valid_skill_level():
+    valid = ["Beginner", "Intermediate", "Advanced"]
+    while True:
+        member_level = input("Enter skill level (Beginner/Intermediate/Advanced): ").strip().title()
+        if member_level in valid:
+            return member_level
+        else:
+            print("Invalid skill level. Please try again using Beginner/Intermediate/Advanced")
+
+# validating number of sessions per week
+def valid_sessions():
+    while True:
+        member_sessions = int(input("Enter number of sessions per week: ")) 
+        if 1 <= member_sessions <= 7:
+            return member_sessions
+        else:
+            print("Invalid entry. Member can only attend 1-7 sessions per week")
+
 # Adds a new member
 def add_new_member(members):
+    member_id = input ("Enter ID: ")
+    name = enter_name()
+    age = valid_age()
+    gender = input("Enter gender: ")
+    membership = valid_membership()
+    date = valid_date() 
+    fee = input("Enter monthly fee (£ pm): ")
+    level = valid_skill_level()
+    sessions = valid_sessions()
     new_member = {
-        "ID": input("Enter ID: "),
-        "Name": input("Enter full name: "),
-        "Age": input("Enter age: "),
-        "Gender": input("Enter gender: "),
-        "Membership Type": input("Enter membership type (Recreational/Development/Competitive): "),
-        "Join Date": input("Enter join date (YYY-MM-DD): "),
-        "Monthly Fee (£ pm)": input("Enter monthly fee (£ pm): "),
-        "Skill Level": input("Enter skill level (Beginner/Intermediate/Advanced): "),
-        "Sessions Per Week": input("Enter number of sessions per week: ")
+        "ID": member_id,
+        "Name": name,
+        "Age": age,
+        "Gender": gender,
+        "Membership Type": membership,
+        "Join Date": date,
+        "Monthly Fee (£ pm)": fee,
+        "Skill Level": level,
+        "Sessions Per Week": sessions
     }
     members.append(new_member)
     print("New member added successfully")
