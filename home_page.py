@@ -1,6 +1,8 @@
 import csv
 import re
 from datetime import datetime 
+import pandas as pd
+
 
 
 # Creating initial dict of 10 records of members
@@ -39,14 +41,12 @@ def save_members_to_csv(members):
 
 # Function to load data from csv
 def load_members(members):
-    members = []
     with open("members.csv", mode="r", encoding="utf-8")as file:
         reader = csv.DictReader(file)
-        members = list(reader)
-    return members
+        return list(reader)
 
-load_members(members)
 
+members = load_members(members)
 
 
 # Views all members
@@ -65,36 +65,64 @@ def single_member(members):
         # converting names to lowercase to see if it exists
         if member["Name"].lower() == name.lower():
             print("\n---Member Found---\n")
-            print(member)
+
+            for key, value in member.items():
+                print(f"{key}: {value}")
+            print("\n")
             break
+
     # once converted to lowercase, if there's no match that member doesn't exist    
     if member["Name"].lower() != name.lower():
         print("\n---Member Not Found---\n")
+
+
+# validating new ID, automatically assigns next id in order
+def generate_id(members):
+    if not members:
+        return "1"
+    max_id = max(int(member["ID"]) for member in members)
+    return str(max_id + 1)
 
 
 # boolean to check if contains numbers or special chars
 def contains_numbers_or_specials(text):
        return bool(re.search(r'[^a-zA-Z\s]', text))
 
-# validates name entry 
+# validates NAME entry 
 def enter_name():
     while True:
-        full_name = input("Enter full name: ").strip().title()
+        full_name = input("Enter full name: ").strip().title() 
+        if not full_name:
+            print("Name is required")
+            continue
         if contains_numbers_or_specials(full_name):
             print("Name cannot contain numbers or special characters. Please try again.")
-        return full_name 
-
-# validating age
+            full_name = input("Enter full name: ").strip().title()
+            continue
+        return full_name   
+             
+# validating AGE
 def valid_age():
     while True:
-        member_age = int(input("Enter age: "))
-        if 3 <= member_age <= 17:
-            return member_age
+        member_age = input("Enter age: ").strip()
+        if member_age.isdigit():
+            age = int(member_age)
+            if 3 <= int(age) <= 17:
+                return age
+        print("Invalid entry. Members must be 3-17 years old. Try again")
+
+# validating GENDER
+def valid_gender():
+    valid = ["F", "M"]
+    while True:
+        input_gender = input("Enter member gender (F/M): ").capitalize().strip()
+        if input_gender in valid:
+            return input_gender
         else:
-            print("Invalid entry. Members must be 3-17 years old. Try again")
+            print("Invalid entry. Please try again (F/M)")
 
 
-# checks date is correct format
+# validating DATE format
 def valid_date():
     while True:
         user_date = input("Enter join date (YYYY-MM-DD): ").strip()
@@ -104,7 +132,16 @@ def valid_date():
         except ValueError:
             print("Invalid date format. Please try again using YYYY-MM-DD")
 
-# validating membership type
+# validating monthly FEE
+def valid_fee():
+    while True:
+        input_fee = input("Enter monthly fee (£ pm): ")
+        if input_fee.isdigit() and 25 <= int(input_fee) <= 80:
+            return input_fee
+        else:
+            print("Invalid fee. Please try again (£25-£80)")
+
+# validating MEMBERSHIP type
 def valid_membership(): 
     valid = ["Recreational", "Development", "Competitive"]
     while True:
@@ -114,7 +151,7 @@ def valid_membership():
         else:
             print("Invalid membership. Please try again using Recreational/Development/Competitive")
 
-# validating skill level
+# validating SKILL level
 def valid_skill_level():
     valid = ["Beginner", "Intermediate", "Advanced"]
     while True:
@@ -124,28 +161,28 @@ def valid_skill_level():
         else:
             print("Invalid skill level. Please try again using Beginner/Intermediate/Advanced")
 
-# validating number of sessions per week
+# validating number of SESSIONS per week
 def valid_sessions():
     while True:
-        member_sessions = int(input("Enter number of sessions per week: ")) 
-        if 1 <= member_sessions <= 7:
+        member_sessions = input("Enter number of sessions per week: ") 
+        if member_sessions.isdigit() and 1 <= int(member_sessions) <= 7:
             return member_sessions
         else:
-            print("Invalid entry. Member can only attend 1-7 sessions per week")
+            print("Invalid entry. Members can attend 1-7 sessions per week")
 
 # Adds a new member
 def add_new_member(members):
-    member_id = input ("Enter ID: ")
+    generate_id(members)
     name = enter_name()
     age = valid_age()
-    gender = input("Enter gender: ")
+    gender = valid_gender()
     membership = valid_membership()
     date = valid_date() 
-    fee = input("Enter monthly fee (£ pm): ")
+    fee = valid_fee()
     level = valid_skill_level()
     sessions = valid_sessions()
     new_member = {
-        "ID": member_id,
+        "ID": generate_id(members), # automatically generates next id in order
         "Name": name,
         "Age": age,
         "Gender": gender,
@@ -158,15 +195,100 @@ def add_new_member(members):
     members.append(new_member)
     print("New member added successfully")
 
+# Amend a member 
+def amend_member(members):
+    select_id = input("Enter the member ID to amend: ")
+
+    for member in members:
+        if str(member.get("ID", "")).strip() == select_id:
+            print("\nEditing member (press Enter to skip)")
+
+            for key, value in member.items():
+                if key == "ID":
+                    continue
+
+                new_value = input(f"{key}, [{value}]: ").strip()
+
+                if not new_value:
+                    continue
+
+                if key == "Join Date":
+                    while True: 
+                        try:
+                            datetime.strptime(new_value, "%Y-%m-%d")
+                            member[key] = new_value
+                            break
+                        except ValueError:
+                            print("Invalid date format. Please try again using YYYY-MM-DD")
+                            new_value = input(f"{key}, [{value}]: ").strip()
+                            if not new_value:
+                                break
+
+
+                elif key == "Membership Type":
+                    valid = ["Recreational", "Development", "Competitive"]
+                    while True:
+                        new_membership = new_value.title() 
+
+                        if new_membership in valid:
+                            member[key] = new_membership
+                            break
+                        
+                        print("Invalid membership. Please try again using Recreational/Development/Competitive")   
+                        new_value = input(f"{key}, [{value}]: ").strip()  
+                        if not new_value:
+                            break 
+                
+                elif key == "Skill Level":
+                    valid = ["Beginner", "Intermediate", "Advanced"]
+                    while True:
+                        new_level = new_value.title()
+
+                        if new_level in valid:
+                            member[key] = new_level
+                            break
+
+                        print("Invalid skill level. Please try again using Beginner/Intermediate/Advanced")
+                        new_value = input(f"{key}, [{value}]: ").strip()
+                        if not new_value:
+                            break
+
+                elif key == "Age":
+                   while True:
+                       new_age = new_value.strip()
+
+                       if new_age.isdigit() and 3 <= int(new_age) <= 17:
+                           member[key] = new_age
+                           break
+
+                       print("Please try again. Enter a valid age")   
+                       new_value = input(f"{key}, [{value}]: ").strip()        
+                       if not new_value:
+                           break
+
+
+
+                else:
+                    member[key] = new_value
+
+            print("\nMember updated successfully\n")
+            return
+
+    print("\nMember not found\n")
+
 
 # Deletes a member
 def delete_member(members):
     view_all_members(members)
-    name = input("Enter full name of the member you want to delete: ")
+    id = input("Enter ID to delete member: ").strip()
+
     for member in members:
-        if member["Name"] == name:
+        if str(member.get("ID", "")).strip() == id:
             members.remove(member)
-            print(f"{member["Name"]} successfully deleted")
+            print(f"\nMember ID: {member['ID']}, {member['Name']} successfully deleted\n")
+            return
+        
+    print("\nMember not found\n")
 
 
 def main_menu(members):
@@ -193,10 +315,13 @@ def main_menu(members):
             single_member(members)
         elif choice == "3":
             add_new_member(members)
+        elif choice == "4":
+            amend_member(members)
         elif choice == "5":
             delete_member(members)
         elif choice == "6":
             print("Goodbye!")
+            save_members_to_csv(members)
             break
         else:
             print("Invalid choice")
