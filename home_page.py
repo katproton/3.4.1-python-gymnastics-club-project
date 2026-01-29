@@ -4,6 +4,8 @@ from datetime import datetime
 from tabulate import tabulate
 
 
+# ***DATA & STORAGE***
+
 # Creating initial dict of 10 records of members
 members = [{"ID": 1, "Name": "Emma Johnson", "Age": 12, "Gender": "F", "Membership Type": "Recreational",
           "Join Date": "2023-1-15", "Monthly Fee (£ pm)": 25, "Skill Level": "Beginner", "Sessions Per Week": 1},
@@ -38,40 +40,10 @@ def save_members_to_csv(members):
 
 
 # Function to load data from csv
-def load_members(members):
+def load_members():
     with open("members.csv", mode="r", encoding="utf-8")as file:
         reader = csv.DictReader(file)
         return list(reader)
-
-
-members = load_members(members)
-
-
-# Views all members
-def view_all_members(members):
-    print(tabulate(members, headers="keys", tablefmt="fancy_grid"))
-    # print("List of all members:\n")
-    # for member in members:
-    #     print(f"ID: {member["ID"]} | Name: {member["Name"]} | Age: {member["Age"]} | Gender: {member["Gender"]} | "
-    #           f"Membership Type: {member["Membership Type"]} | Join Date: {member["Join Date"]} |\n Monthly Fee (£ pm): {member["Monthly Fee (£ pm)"]} | "
-    #           f"Skill Level: {member["Skill Level"]} | Sessions Per Week: {member["Sessions Per Week"]}\n")
-
-
-# Views a single member
-def single_member(members):
-    name = input("Enter full name: ").strip()
-
-    for member in members:
-        #converting names to lowercase to see if it exists
-        if member["Name"].lower() == name.lower():
-            print("\n---Member Found---\n")
-            rows = [(k, v) for k, v in member.items()]
-            print(tabulate(rows, headers=["Information", "Member Info"], tablefmt="fancy_grid"))
-            break
-
-    # once converted to lowercase, if there's no match that member doesn't exist    
-    if member["Name"].lower() != name.lower():
-        print("\n---Member Not Found---\n")
 
 
 # validating new ID, automatically assigns next id in order
@@ -81,6 +53,8 @@ def generate_id(members):
     max_id = max(int(member["ID"]) for member in members)
     return str(max_id + 1)
 
+
+# ***VALIDATIONS***
 
 # boolean to check if contains numbers or special chars
 def contains_numbers_or_specials(text):
@@ -169,9 +143,38 @@ def valid_sessions():
         else:
             print("Invalid entry. Members can attend 1-7 sessions per week")
 
+
+# ***CRUD OPERATIONS***
+
+# Views all members
+def view_all_members(members):
+    print(tabulate(members, headers="keys", tablefmt="fancy_grid"))
+    # print("List of all members:\n")
+    # for member in members:
+    #     print(f"ID: {member["ID"]} | Name: {member["Name"]} | Age: {member["Age"]} | Gender: {member["Gender"]} | "
+    #           f"Membership Type: {member["Membership Type"]} | Join Date: {member["Join Date"]} |\n Monthly Fee (£ pm): {member["Monthly Fee (£ pm)"]} | "
+    #           f"Skill Level: {member["Skill Level"]} | Sessions Per Week: {member["Sessions Per Week"]}\n")
+
+
+# Views a single member
+def single_member(members):
+    name = input("Enter full name: ").strip()
+
+    for member in members:
+        #converting names to lowercase to see if it exists
+        if member["Name"].lower() == name.lower():
+            print("\n---Member Found---\n")
+            rows = [(k, v) for k, v in member.items()]
+            print(tabulate(rows, headers=["Information", "Member Info"], tablefmt="fancy_grid"))
+            break
+
+    # once converted to lowercase, if there's no match that member doesn't exist    
+    if member["Name"].lower() != name.lower():
+        print("\n---Member Not Found---\n")
+
+
 # Adds a new member
 def add_new_member(members):
-    generate_id(members)
     name = enter_name()
     age = valid_age()
     gender = valid_gender()
@@ -194,9 +197,10 @@ def add_new_member(members):
     members.append(new_member)
     print("\n---New member added successfully---\n")
 
+
 # Amend a member 
 def amend_member(members):
-    select_id = input("Enter the member ID to amend: ")
+    select_id = input("Enter the member ID to amend: ").strip()
 
     for member in members:
         if str(member.get("ID", "")).strip() == select_id:
@@ -212,25 +216,44 @@ def amend_member(members):
                     continue
 
                 elif key == "Name":
-                    enter_name() 
-
-                elif key == "Gender":
-                    valid_gender()
-
-                elif key == "Join Date":
                     while True: 
-                        try:
-                            datetime.strptime(new_value, "%Y-%m-%d")
-                            member[key] = new_value
-                            break
-                        except ValueError:
-                            print("Invalid date format. Please try again using YYYY-MM-DD")
+                        new_name = new_value.title()
+
+                        if contains_numbers_or_specials(new_name):
+                            print("Invalid entry. Enter full name")
                             new_value = input(f"{key}, [{value}]: ").strip()
                             if not new_value:
                                 break
+                            continue
+                        member[key] = new_name 
+                        break                      
+                            
+                elif key == "Age":
+                   while True:
+                       new_age = new_value.strip()
 
-                elif key == "Monthly Fee (£ pm)":
-                    valid_fee()
+                       if new_age.isdigit() and 3 <= int(new_age) <= 17:
+                           member[key] = new_age
+                           break
+
+                       print("Please try again. Enter a valid age")   
+                       new_value = input(f"{key}, [{value}]: ").strip()        
+                       if not new_value:
+                           break
+                       
+                elif key == "Gender":
+                    valid = ["F", "M"]
+                    while True:
+                        new_gender = new_value.strip()
+
+                        if new_gender in valid:
+                            member[key] = new_gender
+                            break
+                        print("Invalid entry. Please try again (F/M)")
+                        new_value = input(f"{key}, [{value}]: ").strip().capitalize()
+                        if not new_value:
+                            break
+
 
                 elif key == "Membership Type":
                     valid = ["Recreational", "Development", "Competitive"]
@@ -245,7 +268,33 @@ def amend_member(members):
                         new_value = input(f"{key}, [{value}]: ").strip()  
                         if not new_value:
                             break 
-                
+
+
+                elif key == "Join Date":
+                    while True: 
+                        try:
+                            datetime.strptime(new_value, "%Y-%m-%d")
+                            member[key] = new_value
+                            break
+                        except ValueError:
+                            print("Invalid date format. Please try again using YYYY-MM-DD")
+                            new_value = input(f"{key}, [{value}]: ").strip()
+                            if not new_value:
+                                break
+
+
+                elif key == "Monthly Fee (£ pm)":
+                    while True:
+                        new_fee = new_value.strip()
+
+                        if new_fee.isdigit() and 25 <= int(new_fee) <= 80:
+                            member[key] = new_fee
+                            break
+                        print("Invalid fee. Please try again (£25-£80)")
+                        new_value = input(f"{key}, [{value}]: ").strip()
+                        if not new_value:
+                            break
+              
 
                 elif key == "Skill Level":
                     valid = ["Beginner", "Intermediate", "Advanced"]
@@ -261,21 +310,18 @@ def amend_member(members):
                         if not new_value:
                             break
 
-                elif key == "Age":
-                   while True:
-                       new_age = new_value.strip()
-
-                       if new_age.isdigit() and 3 <= int(new_age) <= 17:
-                           member[key] = new_age
-                           break
-
-                       print("Please try again. Enter a valid age")   
-                       new_value = input(f"{key}, [{value}]: ").strip()        
-                       if not new_value:
-                           break
 
                 elif key == "Sessions Per Week":
-                    valid_sessions()
+                    while True:
+                        new_sessions = new_value.strip()
+
+                        if new_sessions.isdigit() and 1 <= int(new_sessions) <= 7:
+                            member[key] = new_sessions
+                            break
+                        print("Invalid entry. Members can attend 1-7 sessions per week")
+                        new_value = input(f"{key}, [{value}]: ").strip()
+                        if not new_value:
+                            break                
 
                 else:
                     member[key] = new_value
@@ -299,6 +345,8 @@ def delete_member(members):
         
     print("\nMember not found\n")
 
+
+# ***MAIN MENU OPERATIONS*** 
 
 def main_menu(members):
     while True:
@@ -335,4 +383,6 @@ def main_menu(members):
         else:
             print("Invalid choice")
 
-main_menu(members)
+
+members = load_members() # assign load function to members  
+main_menu(members) # so on running main menu 'members' is reading from csv to get up-to-date records
