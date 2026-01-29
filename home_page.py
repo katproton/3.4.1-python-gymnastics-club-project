@@ -1,8 +1,7 @@
 import csv
 import re
 from datetime import datetime 
-import pandas as pd
-
+from tabulate import tabulate
 
 
 # Creating initial dict of 10 records of members
@@ -28,7 +27,7 @@ members = [{"ID": 1, "Name": "Emma Johnson", "Age": 12, "Gender": "F", "Membersh
           "Join Date": "2023-1-7", "Monthly Fee (£ pm)": 65, "Skill Level": "Advanced", "Sessions Per Week": 4}]
 
 
-# Function to initially write the dict to a csv file. Only needed once
+# Saves changes to csv file 
 def save_members_to_csv(members):
     with open("members.csv", mode="w", newline="", encoding="utf-8") as file:
         fieldnames = ["ID", "Name", "Age", "Gender", "Membership Type", "Join Date", 
@@ -36,7 +35,6 @@ def save_members_to_csv(members):
         writer = csv.DictWriter(file, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(members)
-# save_members_to_csv(members)
 
 
 # Function to load data from csv
@@ -51,24 +49,24 @@ members = load_members(members)
 
 # Views all members
 def view_all_members(members):
-    print("List of all members:\n")
-    for member in members:
-        print(f"ID: {member["ID"]} | Name: {member["Name"]} | Age: {member["Age"]} | Gender: {member["Gender"]} | "
-              f"Membership Type: {member["Membership Type"]} | Join Date: {member["Join Date"]} |\n Monthly Fee (£ pm): {member["Monthly Fee (£ pm)"]} | "
-              f"Skill Level: {member["Skill Level"]} | Sessions Per Week: {member["Sessions Per Week"]}\n")
+    print(tabulate(members, headers="keys", tablefmt="fancy_grid"))
+    # print("List of all members:\n")
+    # for member in members:
+    #     print(f"ID: {member["ID"]} | Name: {member["Name"]} | Age: {member["Age"]} | Gender: {member["Gender"]} | "
+    #           f"Membership Type: {member["Membership Type"]} | Join Date: {member["Join Date"]} |\n Monthly Fee (£ pm): {member["Monthly Fee (£ pm)"]} | "
+    #           f"Skill Level: {member["Skill Level"]} | Sessions Per Week: {member["Sessions Per Week"]}\n")
 
 
 # Views a single member
 def single_member(members):
     name = input("Enter full name: ").strip()
+
     for member in members:
-        # converting names to lowercase to see if it exists
+        #converting names to lowercase to see if it exists
         if member["Name"].lower() == name.lower():
             print("\n---Member Found---\n")
-
-            for key, value in member.items():
-                print(f"{key}: {value}")
-            print("\n")
+            rows = [(k, v) for k, v in member.items()]
+            print(tabulate(rows, headers=["Information", "Member Info"], tablefmt="fancy_grid"))
             break
 
     # once converted to lowercase, if there's no match that member doesn't exist    
@@ -92,13 +90,15 @@ def contains_numbers_or_specials(text):
 def enter_name():
     while True:
         full_name = input("Enter full name: ").strip().title() 
+
         if not full_name:
             print("Name is required")
             continue
+
         if contains_numbers_or_specials(full_name):
             print("Name cannot contain numbers or special characters. Please try again.")
-            full_name = input("Enter full name: ").strip().title()
             continue
+
         return full_name   
              
 # validating AGE
@@ -120,7 +120,6 @@ def valid_gender():
             return input_gender
         else:
             print("Invalid entry. Please try again (F/M)")
-
 
 # validating DATE format
 def valid_date():
@@ -193,7 +192,7 @@ def add_new_member(members):
         "Sessions Per Week": sessions
     }
     members.append(new_member)
-    print("New member added successfully")
+    print("\n---New member added successfully---\n")
 
 # Amend a member 
 def amend_member(members):
@@ -212,7 +211,13 @@ def amend_member(members):
                 if not new_value:
                     continue
 
-                if key == "Join Date":
+                elif key == "Name":
+                    enter_name() 
+
+                elif key == "Gender":
+                    valid_gender()
+
+                elif key == "Join Date":
                     while True: 
                         try:
                             datetime.strptime(new_value, "%Y-%m-%d")
@@ -224,6 +229,8 @@ def amend_member(members):
                             if not new_value:
                                 break
 
+                elif key == "Monthly Fee (£ pm)":
+                    valid_fee()
 
                 elif key == "Membership Type":
                     valid = ["Recreational", "Development", "Competitive"]
@@ -239,6 +246,7 @@ def amend_member(members):
                         if not new_value:
                             break 
                 
+
                 elif key == "Skill Level":
                     valid = ["Beginner", "Intermediate", "Advanced"]
                     while True:
@@ -266,15 +274,16 @@ def amend_member(members):
                        if not new_value:
                            break
 
-
+                elif key == "Sessions Per Week":
+                    valid_sessions()
 
                 else:
                     member[key] = new_value
 
-            print("\nMember updated successfully\n")
+            print("\n---Member updated successfully---\n")
             return
 
-    print("\nMember not found\n")
+    print("\n---Member not found---\n")
 
 
 # Deletes a member
