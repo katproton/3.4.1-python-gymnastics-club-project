@@ -40,8 +40,12 @@ def generate_id(members)->int:
 def valid_name(value):
     value = value.strip().title()
 
+    if not value:
+        raise ValueError("Name cannot be empty")
+    
     if re.search(r'[^a-zA-Z\s]', value):
         raise ValueError("Name must only contain alphabetic characters")
+    
     return value  
              
 # validating AGE
@@ -85,19 +89,19 @@ def valid_fee(value:str)->int:
 
 # validating MEMBERSHIP type
 def valid_membership(value): 
-    value = value.strip().title()
+    value = value.strip().upper()
 
-    if value not in ["Recreational", "Development", "Competitive"]:
-        raise ValueError("Memberships must be Recreational/Development/Competitive")
+    if value not in ["R", "D", "C"]:
+        raise ValueError("Memberships must be r/d/c (Recreational/Development/Competitive)")
     
     return value
     
 # validating SKILL level
 def valid_skill_level(value):
-    value = value.strip().title()
+    value = value.strip().upper()
 
-    if value not in ["Beginner", "Intermediate", "Advanced"]:
-        raise ValueError("Member must be Beginner/Intermediate/Advance")
+    if value not in ["B", "I", "A"]:
+        raise ValueError("Member must be b/i/a (Beginner/Intermediate/Advanced)")
     return value
       
 # validating number of SESSIONS per week

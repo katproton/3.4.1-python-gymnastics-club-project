@@ -9,13 +9,13 @@ from validations import (
 # Adds a new member
 def add_new_member(members):
     name = input_required("Name: ", valid_name)
-    age = input_required("Age: ", valid_age)
-    gender = input_required("Gender: ", valid_gender)
-    membership = input_required("Membership Type: ", valid_membership)
-    date = input_required("Join Date: ", valid_date)
-    fee = input_required("Monthly Fee (£ pm): ", valid_fee)
-    level = input_required("Skill Level: ", valid_skill_level)
-    sessions = input_required("Sessions Per Week: ", valid_sessions)
+    age = input_required("Age (3-17): ", valid_age)
+    gender = input_required("Gender (f/m): ", valid_gender)
+    membership = input_required("Membership Type. Enter r/d/c (Recreational/Development/Competitive): ", valid_membership)
+    date = input_required("Join Date (YYYY-MM-DD): ", valid_date)
+    fee = input_required("Monthly Fee (£25-£80 pm): ", valid_fee)
+    level = input_required("Skill Level. Enter b/i/a (Beginner/Intermediate/Advanced): ", valid_skill_level)
+    sessions = input_required("Sessions Per Week (1-7): ", valid_sessions)
    
     new_member = {
         "ID": generate_id(members), # automatically generates next id in order
@@ -24,7 +24,7 @@ def add_new_member(members):
         "Gender": gender,
         "Membership Type": membership,
         "Join Date": date,
-        "Monthly Fee (£ pm)": fee,
+        "Fee": fee,
         "Skill Level": level,
         "Sessions Per Week": sessions
     }
