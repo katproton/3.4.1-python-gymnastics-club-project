@@ -1,5 +1,3 @@
-# import re
-# from datetime import datetime 
 from validations import (
     valid_age, valid_name, valid_gender, valid_membership, 
     valid_date, valid_fee, valid_skill_level, 
@@ -8,6 +6,8 @@ from validations import (
 
 # Adds a new member
 def add_new_member(members):
+    # calls imported function from validations to ensure all fields are filled in 
+    # calls field validating function for corresponding fields to ensure valid data is added 
     name = input_required("Name: ", valid_name)
     age = input_required("Age (3-17): ", valid_age)
     gender = input_required("Gender (f/m): ", valid_gender)
@@ -17,6 +17,7 @@ def add_new_member(members):
     level = input_required("Skill Level. Enter b/i/a (Beginner/Intermediate/Advanced): ", valid_skill_level)
     sessions = input_required("Sessions Per Week (1-7): ", valid_sessions)
    
+    # assigns above data to new member dict
     new_member = {
         "ID": generate_id(members), # automatically generates next id in order
         "Name": name,

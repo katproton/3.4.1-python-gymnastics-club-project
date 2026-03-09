@@ -3,6 +3,7 @@ from datetime import datetime
 import amend_member
 import add_member
 from tabulate import tabulate
+import sys
 
 # ***DATA & STORAGE***
 
@@ -35,6 +36,7 @@ fieldnames = ["ID", "Name", "Age", "Gender", "Membership Type",
 
 # Saves changes to csv file 
 def save_members_to_csv(members):
+    # opens members.csv and writes new data to file 
     with open("members.csv", mode="w", newline="", encoding="utf-8") as file:
         writer = csv.DictWriter(file, fieldnames=fieldnames)
         writer.writeheader()
@@ -43,42 +45,37 @@ def save_members_to_csv(members):
 
 # Function to load data from csv
 def load_members():
-    try:
+    try: # try to find members.csv file to read and assign to members 
         with open("members.csv", mode="r", encoding="utf-8")as file:
             reader = csv.DictReader(file)
             members = list(reader)
         
-        for m in members: # converts numbers to ints for compatibility 
+        for m in members: # converts numbers to ints for compatibility for each member record
             m["ID"] = int(m["ID"])
             m["Age"] = int(m["Age"])
             m["Fee"] = int(m["Fee"])
             m["Sessions Per Week"] = int(m["Sessions Per Week"])
 
         return members 
+    
     except FileNotFoundError:
         return [] # if the file isn't found, start with an empty list
 
 
 # ***CRUD OPERATIONS***
 
-# Views all members
+# Views all members into a visual table 
 def view_all_members(members):
     print(tabulate(members, headers="keys", tablefmt="fancy_grid"))
-    # print("List of all members:\n")
-    # for member in members:
-    #     print(f"ID: {member["ID"]} | Name: {member["Name"]} | Age: {member["Age"]} | Gender: {member["Gender"]} | "
-    #           f"Membership Type: {member["Membership Type"]} | Join Date: {member["Join Date"]} |\n Fee: {member["Fee"]} | "
-    #           f"Skill Level: {member["Skill Level"]} | Sessions Per Week: {member["Sessions Per Week"]}\n")
-
 
 # Views a single member
 def single_member(members):
     id = int(input("Enter member ID: "))
-
+    # iterates to find matching id for user input
     for member in members:
         if member["ID"] == id:
             print("\n---Member Found---\n")
-            rows = [(k, v) for k, v in member.items()]
+            rows = [(k, v) for k, v in member.items()] # finds all key, value pairs for member if id found and presents in visual table 
             print(tabulate(rows, headers=["Information", "Member Info"], tablefmt="fancy_grid"))
             return
     
@@ -86,37 +83,49 @@ def single_member(members):
 
 
 # Deletes a member
-# ADD IN ARE YOU SURE YOU WANT TO DELETE ETC...
 def delete_member(members):
     view_all_members(members)
     id = int(input("Enter ID to delete member: "))
 
     for member in members:
-        if member["ID"] == id:
-            members.remove(member)
-            save_members_to_csv(members)
-            print(f"\nMember ID: {member['ID']}, {member['Name']} successfully deleted and saved\n")
-            return
-        
+        if member["ID"] == id: # if finds a match between member id and user input
+            while True:
+                # checks deletion confirmation of correct member before deleting
+                delete_confirmation = input(f"Are you sure you want to delete member: {member['ID']} {member['Name']}?\nY/N: ").upper().strip()
+                # if user confirms deletion, remove member record and save changes, shows confirmation message
+                if delete_confirmation == 'Y': 
+                    members.remove(member)
+                    save_members_to_csv(members)
+                    print(f"\nMember ID: {member['ID']}, {member['Name']} successfully deleted and saved\n")
+                    return
+                # if user selects NO, displays message and cancels operation returning user to main menu 
+                elif delete_confirmation == 'N':
+                    print("Deletion cancelled")
+                    return
+                # if user enters anything other than valid option, will ask user again for valid input
+                else:
+                    print("Please enter Y or N")
+    # displays message if user input id does not match any member id in records                    
     print("\nMember not found\n")
 
 # summary of data
 def summary(members):
     rows = [
-        {"ID": m["ID"], "Name": m["Name"]}
+        {"ID": m["ID"], "Name": m["Name"]} # only displays member's id and name for data summary
         for m in members
     ]
+    # formats into visual table   
     print(tabulate(rows, headers="keys", tablefmt="fancy_grid"))
     
 # ***MAIN MENU OPERATIONS*** 
 
 def main_menu(members):
-    loaded = load_members()
+    loaded = load_members() # calls load function to load member data 
     if not loaded:
-        save_members_to_csv(members)
+        save_members_to_csv(members) # if unsuccessful load calls save function 
     else:
-        members = loaded
-    
+        members = loaded # if successful load, assigns load to members
+    # home page display format and on a loop to always allow user interaction
     while True:
         print("\n---Welcome to Silver Springs Gymnastics Club Home Page---\n")
         summary(members)
@@ -135,6 +144,7 @@ def main_menu(members):
         # Allows user to input choice form main menu
         choice = input("Select menu selection: ").strip()
 
+        # calls appropriate function according to user selection followed by save function
         if choice == "1":
             view_all_members(members)
         elif choice == "2":
@@ -152,9 +162,9 @@ def main_menu(members):
         elif choice == "6":
             print("Saved. Goodbye!")
             save_members_to_csv(members)
-            break
+            sys.exit()
         else:
-            print("Invalid choice")
+            print("Invalid choice") # error message if user input is invalid 
 
-
+# calls main menu function to start up programme 
 main_menu(members)

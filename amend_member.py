@@ -3,7 +3,7 @@
 from validations import valid_age, valid_name, valid_gender, valid_membership, valid_date, valid_fee, valid_skill_level, valid_sessions, prompt_validated
 # from display_all import view_all_members
 
-# assigning fields to validators
+# maps each member data field to its corresponding validation function 
 field_validators = {
     "Name": valid_name,
     "Age": valid_age,
@@ -15,6 +15,7 @@ field_validators = {
     "Sessions Per Week": valid_sessions
 }
 
+# maps internal data field names to user-friendly prompt labels 
 field_labels = {
     "Name": "Name",
     "Age": "Age (3-17)",
